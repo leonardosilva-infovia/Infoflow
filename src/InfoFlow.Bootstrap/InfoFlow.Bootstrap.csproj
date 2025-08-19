@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Versioning + Swagger -->
+        <PackageReference Include="Asp.Versioning.Mvc" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+
+        <!-- Auth -->
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+
+        <!-- Serilog -->
+        <PackageReference Include="Serilog.AspNetCore" />
+
+        <!-- HTTP Resiliência -->
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+
+        <!-- Messaging -->
+        <PackageReference Include="MassTransit" />
+        <PackageReference Include="MassTransit.RabbitMQ" />
+    </ItemGroup>
+
+</Project>

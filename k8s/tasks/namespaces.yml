@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata: { name: infoflow }
+---
+apiVersion: v1
+kind: Namespace
+metadata: { name: infoflow-infra }

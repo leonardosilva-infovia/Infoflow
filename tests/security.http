@@ -1,0 +1,221 @@
+@baseUrl = http://localhost:5170
+@api = {{baseUrl}}/api/v1
+@userEmail = admin@teste.com
+@userPassword = Teste@123
+@fullName = Admin Test
+
+### 0) Healthcheck opcional (ver porta / baseUrl)
+GET {{baseUrl}}/health
+Accept: text/plain
+
+### 1) Registrar usuário (pode retornar 201 com/sem body)
+POST {{api}}/auth/register
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{userEmail}}",
+  "userName": "admin",
+  "password": "{{userPassword}}",
+  "fullName": "{{fullName}}"
+}
+
+> {%
+    // Não assumimos que o register devolve token. Apenas logamos p/ debug.
+    console.log("REGISTER status:", response.status);
+    if (!response.body) {
+        console.log("REGISTER sem body (isso é ok).");
+    } else {
+        console.log("REGISTER body:", response.body);
+    }
+%}
+
+### 2) Login (captura tokens de forma segura)
+POST {{api}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+> {%
+    // O body pode ser string ou objeto; normalizamos
+    let data = response.body;
+    if (typeof data === "string") {
+        try { data = JSON.parse(data); } catch { data = {}; }
+    }
+    if (!data || typeof data !== "object") data = {};
+
+    // Logs úteis pra debug
+    console.log("LOGIN status:", response.status);
+    console.log("LOGIN body:", data);
+
+    const at = data.accessToken;
+    const rt = data.refreshToken;
+    const exp = data.expiresAt;
+
+    if (!at) {
+        throw new Error("Login não retornou accessToken. Verifique Program.cs, AuthController e JWT.");
+    }
+    if (!rt) {
+        throw new Error("Login não retornou refreshToken. Confira emissão via IRefreshTokenService.");
+    }
+
+    client.global.set("accessToken", at);
+    client.global.set("refreshToken", rt);
+    client.global.set("accessTokenExpiresAt", exp ?? "");
+%}
+
+### 3) /me com access token
+GET {{api}}/auth/me
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    console.log("ME status:", response.status);
+    console.log("ME body:", response.body);
+%}
+
+### 4) Refresh (gera novos tokens; substitui os globais)
+POST {{api}}/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    let data = response.body;
+    if (typeof data === "string") {
+        try { data = JSON.parse(data); } catch { data = {}; }
+    }
+    if (!data || typeof data !== "object") data = {};
+
+    console.log("REFRESH status:", response.status);
+    console.log("REFRESH body:", data);
+
+    const at = data.accessToken;
+    const rt = data.refreshToken;
+
+    if (!at || !rt) {
+        throw new Error("Refresh não retornou novos tokens. Verifique AuthController.Refresh.");
+    }
+
+    client.global.set("accessToken", at);
+    client.global.set("refreshToken", rt);
+%}
+
+### 5) Logout (revoga o refresh atual)
+### Logout (revoga o refresh token atual)
+POST {{api}}/auth/logout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    console.log("LOGOUT status:", response.status);
+    if (response.status !== 204) {
+        console.log("LOGOUT body:", response.body);
+        throw new Error("Logout deveria retornar 204 No Content.");
+    }
+%}
+
+### 6) Tentar refresh com token revogado (deve falhar 401)
+POST {{api}}/auth/refresh
+Content-Type: application/json
+Accept: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    console.log("REFRESH (revogado) status:", response.status);
+    if (response.status === 200) {
+        console.log("Body:", response.body);
+        throw new Error("Esperado 401, mas veio 200. Token revogado não deveria funcionar.");
+    }
+%}
+
+### 7) Criar role "manager" (requer perm Security.Roles.Manage)
+POST {{api}}/roles
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{ "name": "manager" }
+
+> {%
+    console.log("CREATE ROLE status:", response.status);
+    console.log("CREATE ROLE headers:", response.headers);
+    console.log("CREATE ROLE body:", response.body);
+    if (response.status !== 201 && response.status !== 200) {
+        throw new Error("Falha ao criar role. Veja logs acima para status/body exatos.");
+    }
+%}
+
+### 8) Listar roles
+GET {{api}}/roles
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    console.log("ROLES status:", response.status);
+    console.log("ROLES body:", response.body);
+%}
+
+### 9) Adicionar role ao usuário atual (pegar id via /me)
+GET {{api}}/auth/me
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    const me = typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+    client.global.set("meId", me.id);
+%}
+
+### 10) Add role manager ao usuário
+POST {{api}}/roles/user
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": "{{meId}}",
+  "roleName": "manager"
+}
+
+> {%
+    if (response.status !== 204) throw new Error("Add role deveria retornar 204.");
+%}
+
+### 11) Ver roles do usuário
+GET {{api}}/roles/user/{{meId}}
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    console.log("USER ROLES:", response.body);
+%}
+
+### 12) Remover role do usuário
+DELETE {{api}}/roles/user
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": "{{meId}}",
+  "roleName": "manager"
+}
+
+> {%
+    if (response.status !== 204) throw new Error("Remove role deveria retornar 204.");
+%}

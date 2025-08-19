@@ -1,0 +1,84 @@
+<Project>
+  <PropertyGroup>
+    <!-- Ativa o Central Package Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- ASP.NET & Versioning -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+    <PackageVersion Include="Asp.Versioning.Mvc" Version="8.1.0" />
+    <PackageVersion Include="Asp.Versioning.Http" Version="8.1.0" />
+    <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
+    <!-- Swagger -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <!-- Auth -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+    <!-- EF Core -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
+    <!-- Driver Npgsql (ADO.NET) - evita pegar 3.x vulnerável -->
+    <PackageVersion Include="Npgsql" Version="8.0.3" />
+    <!-- Resiliência Http -->
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="9.0.0" />
+    <!-- MassTransit -->
+    <PackageVersion Include="MassTransit" Version="8.2.3" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.2.3" />
+    <!-- Serilog (alinhar família e evitar downgrades) -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Seq" Version="5.2.2" />
+    <!-- CQRS -->
+    <PackageVersion Include="MediatR" Version="11.1.0" />
+    <PackageVersion Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <!-- Validação (opcional mas recomendado) -->
+    <PackageVersion Include="FluentValidation" Version="11.9.2" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />
+    <!-- HealthChecks (opcional) -->
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="7.0.0" />
+    <!-- Identity + Tokens -->
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+
+    <!-- OTel base estável -->
+    <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
+
+    <!-- Framework de testes -->
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+
+    <!-- Fluent Assertions -->
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+
+    <!-- Teste de ASP.NET Core / APIs -->
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.0" />
+
+    <!-- Mocking -->
+    <PackageVersion Include="Moq" Version="4.20.72" />
+
+    <!-- Testcontainers para integração com Docker -->
+    <!-- Testcontainers (novo id) -->
+    <PackageVersion Include="Testcontainers" Version="4.6.0" />
+    <!-- módulos (adicione só os que for usar) -->
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.6.0" />    
+
+    <!-- Necessário para usar HttpClient com JSON em testes -->
+    <PackageVersion Include="System.Net.Http.Json" Version="9.0.0" />
+  </ItemGroup>
+</Project>

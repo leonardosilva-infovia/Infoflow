@@ -1,0 +1,191 @@
+### VARIÁVEIS BÁSICAS
+@baseUrl = http://localhost:5170
+@contentType = application/json
+
+# Usuário de teste (ajuste o email para não colidir)
+@userEmail = test.user01@infoflow.local
+@userPass  = Passw0rd!
+
+# Admin (seu seed pode criar outro email; se precisar, troque aqui)
+@adminEmail = admin@infoflow.local
+@adminPass  = Admin@123
+
+### 1) HEALTHCHECK (opcional)
+GET {{baseUrl}}/health
+Accept: application/json
+
+### 2) REGISTER (cria um usuário comum)
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "fullName": "Test User 01",
+  "email": "{{userEmail}}",
+  "password": "{{userPass}}"
+}
+
+> {%
+    // Não falha se já existir; seguimos adiante
+    client.log("REGISTER status: " + response.status);
+%}
+
+### 3) LOGIN (usuário comum)
+# Guarda accessToken/refreshToken em variáveis para as próximas chamadas
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{userPass}}"
+}
+
+> {%
+    try {
+        const body = response.body ? JSON.parse(response.body) : null;
+        if (body && body.accessToken) {
+            client.global.set("userAccessToken", body.accessToken);
+            client.global.set("userRefreshToken", body.refreshToken);
+            client.log("Login OK. accessToken salvo.");
+        } else {
+            client.log("Login sem token. Body: " + response.body);
+        }
+    } catch (e) { client.log("Parse login falhou: " + e); }
+%}
+
+### 4) /me (usuário comum)
+GET {{baseUrl}}/api/v1/auth/me
+Accept: application/json
+Authorization: Bearer {{userAccessToken}}
+
+### 5) LOGIN ADMIN (para endpoints de role/assign se exigirem permissão)
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPass}}"
+}
+
+> {%
+    try {
+        const body = response.body ? JSON.parse(response.body) : null;
+        if (body && body.accessToken) {
+            client.global.set("adminAccessToken", body.accessToken);
+            client.log("Admin login OK. accessToken salvo.");
+        } else {
+            client.log("Admin login sem token. Body: " + response.body);
+        }
+    } catch (e) { client.log("Parse admin login falhou: " + e); }
+%}
+
+### 6) CRIAR ROLE (via admin) — ajuste o nome se precisar
+POST {{baseUrl}}/api/v1/roles
+Content-Type: {{contentType}}
+Accept: application/json
+Authorization: Bearer {{adminAccessToken}}
+
+{
+  "name": "manager"
+}
+
+### 7) ATRIBUIR ROLE AO USUÁRIO (via admin)
+# Exemplo de rota comum: /api/v1/users/{userId}/roles/{roleName}
+# Se sua API for diferente, ajuste (p.ex. body com { userId, role }).
+# Para simplificar, vamos buscar usuários e capturar o id.
+GET {{baseUrl}}/api/v1/users?skip=0&take=50
+Accept: application/json
+Authorization: Bearer {{adminAccessToken}}
+
+> {%
+    // Captura o primeiro usuário com email {{userEmail}} e salva userId
+    try {
+        const list = response.body ? JSON.parse(response.body) : null;
+        if (Array.isArray(list)) {
+            const u = list.find(x => (x.email||"").toLowerCase() === "{{userEmail}}".toLowerCase());
+            if (u && u.id) {
+                client.global.set("targetUserId", u.id);
+                client.log("targetUserId: " + u.id);
+            } else {
+                client.log("Usuário de teste não encontrado na lista.");
+            }
+        } else {
+            client.log("Resposta de users não é array. Body: " + response.body);
+        }
+    } catch (e) { client.log("Parse users falhou: " + e); }
+%}
+
+### 7.1) ASSIGN ROLE (se sua rota usa path parameters)
+POST {{baseUrl}}/api/v1/users/{{targetUserId}}/roles/manager
+Accept: application/json
+Authorization: Bearer {{adminAccessToken}}
+
+### 8) CHANGE PASSWORD (usuário comum) — senha antiga correta
+POST {{baseUrl}}/api/v1/auth/change-password
+Content-Type: {{contentType}}
+Accept: application/json
+Authorization: Bearer {{userAccessToken}}
+
+{
+  "currentPassword": "{{userPass}}",
+  "newPassword": "N3wPassw0rd!"
+}
+
+> {% client.global.set("userPass", "N3wPassw0rd!"); %}
+
+### 9) LOGIN NOVAMENTE (com a senha nova)
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "N3wPassw0rd!"
+}
+
+> {%
+    try {
+        const body = response.body ? JSON.parse(response.body) : null;
+        if (body && body.accessToken) {
+            client.global.set("userAccessToken", body.accessToken);
+            client.global.set("userRefreshToken", body.refreshToken);
+            client.log("Login com nova senha OK.");
+        } else {
+            client.log("Login com nova senha sem token. Body: " + response.body);
+        }
+    } catch (e) { client.log("Parse login nova senha falhou: " + e); }
+%}
+
+### 10) REFRESH TOKEN (se exposto em /api/v1/auth/refresh)
+POST {{baseUrl}}/api/v1/auth/refresh
+Content-Type: {{contentType}}
+Accept: application/json
+
+{
+  "refreshToken": "{{userRefreshToken}}"
+}
+
+> {%
+    try {
+        const body = response.body ? JSON.parse(response.body) : null;
+        if (body && body.accessToken) {
+            client.global.set("userAccessToken", body.accessToken);
+            client.global.set("userRefreshToken", body.refreshToken);
+            client.log("Refresh OK. Tokens atualizados.");
+        } else {
+            client.log("Refresh sem tokens. Body: " + response.body);
+        }
+    } catch (e) { client.log("Parse refresh falhou: " + e); }
+%}
+
+### 11) LOGOUT / REVOKE REFRESH TOKEN (se exposto em /api/v1/auth/logout)
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: {{contentType}}
+Accept: application/json
+Authorization: Bearer {{userAccessToken}}
+
+{
+  "refreshToken": "{{userRefreshToken}}"
+}

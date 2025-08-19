@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Versões vem do Directory.Packages.props -->
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Asp.Versioning.Mvc" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+    <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InfoFlow.Application\InfoFlow.Application.csproj" />
+    <ProjectReference Include="..\InfoFlow.Persistence\InfoFlow.Persistence.csproj" />
+    <ProjectReference Include="..\InfoFlow.Infrastructure\InfoFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\InfoFlow.Shared\InfoFlow.Shared.csproj" />
+    <ProjectReference Include="..\InfoFlow.Bootstrap\InfoFlow.Bootstrap.csproj" />
+    <ProjectReference Include="..\InfoFlow.Bootstrap.Observability\InfoFlow.Bootstrap.Observability.csproj" />
+  </ItemGroup>
+
+</Project>

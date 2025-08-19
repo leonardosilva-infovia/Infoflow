@@ -1,0 +1,14 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <LangVersion>latest</LangVersion>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+    <ItemGroup>
+        <!-- stylecop/analysers podem ser adicionados depois -->
+    </ItemGroup>
+</Project>
